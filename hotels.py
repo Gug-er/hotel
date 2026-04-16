@@ -1,19 +1,28 @@
 import uvicorn
 from fastapi import APIRouter
 
+from dependencies import PaginationDep
 from schemas.hotels import Hotel, HotelPATCH, HotelGET
 
 
 router = APIRouter(prefix='/hotels', tags=['Hotels'])
 
 hotels = [
-    {'id': 1, 'title': 'Sochi', 'name': 'sochi'},
-    {'id': 2, 'title': 'Dubai', 'name': 'dubai'},
+    {"id": 1, "title": "Sochi", "name": "sochi"},
+    {"id": 2, "title": "Дубай", "name": "dubai"},
+    {"id": 3, "title": "Мальдивы", "name": "maldivi"},
+    {"id": 4, "title": "Геленджик", "name": "gelendzhik"},
+    {"id": 5, "title": "Москва", "name": "moscow"},
+    {"id": 6, "title": "Казань", "name": "kazan"},
+    {"id": 7, "title": "Санкт-Петербург", "name": "spb"},
 ]
 
 @router.get('',
             summary='Get hotel list',)
-def get_hotels(hotel_data: HotelGET):
+def get_hotels(
+        pagination: PaginationDep,
+        hotel_data: HotelGET,
+):
     hotels_ = []
     for hotel in hotels:
         if hotel_data.id and (hotel['id'] != hotel_data.id):
@@ -21,7 +30,9 @@ def get_hotels(hotel_data: HotelGET):
         if hotel_data.title and (hotel['title'] != hotel_data.title):
             continue
         hotels_.append(hotel)
-    return hotels_
+
+    return hotels_[(pagination.page + 1)
+                   * pagination.per_page:pagination.per_page]
 
 
 @router.post('',
