@@ -9,7 +9,8 @@ hotels = [
     {'id': 2, 'title': 'Dubai', 'name': 'dubai'},
 ]
 
-@router.get('')
+@router.get('',
+            summary='Get hotel list',)
 def get_hotels(
         id: int | None = Query(None, description='Hotel ID'),
         title: str | None = Query(None, description='Hotel title'),
@@ -24,7 +25,9 @@ def get_hotels(
     return hotels_
 
 
-@router.post('')
+@router.post('',
+             summary='Create hotel',
+             description='Adds hotel to hotels, title and name required, id generates')
 def create_hotel(
         title: str = Body(),
         name: str = Body(),
@@ -38,7 +41,9 @@ def create_hotel(
     return {'status': 'OK'}
 
 
-@router.put('/{hotel_id}')
+@router.put('/{hotel_id}',
+            summary='Edit hotel by id',
+            description='Gets hotel by id and updates hotel title and name',)
 def edit_hotel(
         hotel_id: int,
         title: str = Body(),
@@ -53,7 +58,9 @@ def edit_hotel(
     return {'status': 'Hotel not found'}
 
 
-@router.patch('/{hotel_id}')
+@router.patch('/{hotel_id}',
+              summary='Patch hotel by id',
+              description='Gets hotel by id and updates hotel title or name', )
 def patch_hotel(
         hotel_id: int,
         title: str | None = Body(default=None),
@@ -72,7 +79,9 @@ def patch_hotel(
     return {'status': 'Hotel not found'}
 
 
-@router.delete('/{hotel_id}')
+@router.delete('/{hotel_id}',
+               summary='Delete hotel by id',
+               description='Rewrites hotels without deleted one', )
 def delete_hotel(hotel_id: int):
     global hotels
     hotels = [hotel for hotel in hotels if hotel['id'] != hotel_id]
