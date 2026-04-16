@@ -1,5 +1,7 @@
 import uvicorn
-from fastapi import Query, Body, APIRouter
+from fastapi import APIRouter
+
+from schemas.hotels import Hotel, HotelPATCH, HotelGET
 
 
 router = APIRouter(prefix='/hotels', tags=['Hotels'])
@@ -11,15 +13,12 @@ hotels = [
 
 @router.get('',
             summary='Get hotel list',)
-def get_hotels(
-        id: int | None = Query(None, description='Hotel ID'),
-        title: str | None = Query(None, description='Hotel title'),
-):
+def get_hotels(hotel_data: HotelGET):
     hotels_ = []
     for hotel in hotels:
-        if id and hotel['id'] != id:
+        if hotel_data.id and (hotel['id'] != hotel_data.id):
             continue
-        if title and hotel['title'] != title:
+        if hotel_data.title and (hotel['title'] != hotel_data.title):
             continue
         hotels_.append(hotel)
     return hotels_
@@ -28,15 +27,12 @@ def get_hotels(
 @router.post('',
              summary='Create hotel',
              description='Adds hotel to hotels, title and name required, id generates')
-def create_hotel(
-        title: str = Body(),
-        name: str = Body(),
-):
+def create_hotel(hotel_data: Hotel):
     global hotels
     hotels.append({
         'id': hotels[-1]['id'] + 1,
-        'title': title,
-        'name': name
+        'title': hotel_data.title,
+        'name': hotel_data.name
     })
     return {'status': 'OK'}
 
@@ -44,16 +40,12 @@ def create_hotel(
 @router.put('/{hotel_id}',
             summary='Edit hotel by id',
             description='Gets hotel by id and updates hotel title and name',)
-def edit_hotel(
-        hotel_id: int,
-        title: str = Body(),
-        name: str = Body(),
-):
+def edit_hotel(hotel_id: int, hotel_data: Hotel):
     global hotels
     for hotel in hotels:
         if hotel['id'] == hotel_id:
-            hotel['title'] = title
-            hotel['name'] = name
+            hotel['title'] = hotel_data.title
+            hotel['name'] = hotel_data.name
             return {'status': 'OK'}
     return {'status': 'Hotel not found'}
 
@@ -61,19 +53,15 @@ def edit_hotel(
 @router.patch('/{hotel_id}',
               summary='Patch hotel by id',
               description='Gets hotel by id and updates hotel title or name', )
-def patch_hotel(
-        hotel_id: int,
-        title: str | None = Body(default=None),
-        name: str | None = Body(default=None),
-):
+def patch_hotel(hotel_id: int, hotel_data: HotelPATCH):
     global hotels
     for hotel in hotels:
         if hotel['id'] == hotel_id:
-            if title:
-                hotel['title'] = title
+            if hotel_data.title:
+                hotel['title'] = hotel_data.title
 
-            if name:
-                hotel['name'] = name
+            if hotel_data.name:
+                hotel['name'] = hotel_data.name
 
             return {'status': 'OK'}
     return {'status': 'Hotel not found'}
