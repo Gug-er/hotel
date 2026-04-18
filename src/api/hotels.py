@@ -1,8 +1,8 @@
 import uvicorn
 from fastapi import APIRouter
 
-from dependencies import PaginationDep
-from schemas.hotels import Hotel, HotelPATCH, HotelGET
+from src.api.dependencies import PaginationDep
+from src.schemas.hotels import Hotel, HotelPATCH, HotelGET
 
 
 router = APIRouter(prefix='/hotels', tags=['Hotels'])
