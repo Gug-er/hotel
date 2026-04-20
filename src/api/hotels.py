@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Body
 
-from sqlalchemy import insert
+from sqlalchemy import insert, select, func
 
 from src.api.dependencies import PaginationDep
-from src.schemas.hotels import Hotel, HotelPATCH
+from src.schemas.hotels import Hotel, HotelPATCH, HotelGET
 from src.database import async_session_maker
 
 from src.models.hotels import HotelsOrm
@@ -11,32 +11,31 @@ from src.models.hotels import HotelsOrm
 
 router = APIRouter(prefix='/hotels', tags=['Hotels'])
 
-hotels = [
-    {"id": 1, "title": "Sochi", "name": "sochi"},
-    {"id": 2, "title": "Дубай", "name": "dubai"},
-    {"id": 3, "title": "Мальдивы", "name": "maldivi"},
-    {"id": 4, "title": "Геленджик", "name": "gelendzhik"},
-    {"id": 5, "title": "Москва", "name": "moscow"},
-    {"id": 6, "title": "Казань", "name": "kazan"},
-    {"id": 7, "title": "Санкт-Петербург", "name": "spb"},
-]
 
 @router.get('',
             summary='Get hotel list',)
-def get_hotels(
+async def get_hotels(
         pagination: PaginationDep,
-        hotel_data: Hotel,
+        hotel_data: HotelGET,
 ):
-    hotels_ = []
-    for hotel in hotels:
-        if hotel_data.id and (hotel['id'] != hotel_data.id):
-            continue
-        if hotel_data.title and (hotel['title'] != hotel_data.title):
-            continue
-        hotels_.append(hotel)
+    per_page = pagination.per_page or 5
+    async with async_session_maker() as session:
+        query = select(HotelsOrm)
 
-    return hotels_[(pagination.page + 1)
-                   * pagination.per_page:pagination.per_page]
+        if hotel_data.location:
+            query = query.filter(func.lower(HotelsOrm.location).contains(hotel_data.location.strip().lower()))
+        if hotel_data.title:
+            query = query.filter(func.lower(HotelsOrm.title).contains(hotel_data.title.strip().lower()))
+
+        query = (
+            query
+            .limit(pagination.per_page)
+            .offset(pagination.per_page * (pagination.page - 1))
+        )
+        result = await session.execute(query)
+
+        hotels = result.scalars().all()
+        return hotels
 
 
 @router.post('',

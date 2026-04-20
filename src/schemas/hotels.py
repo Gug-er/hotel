@@ -8,3 +8,8 @@ class Hotel(BaseModel):
 class HotelPATCH(BaseModel):
     title: str | None = None
     location: str | None = None
+
+
+class HotelGET(BaseModel):
+    title: str | None = None
+    location: str | None = None
