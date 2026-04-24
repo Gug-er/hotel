@@ -18,7 +18,12 @@ async def get_hotels(
         hotel_data: HotelGET,
 ):
     async with async_session_maker() as session:
-        return await HotelsRepository(session).get_all
+        return await HotelsRepository(session).get_all(
+            location=hotel_data.location,
+            title=hotel_data.title,
+            limit=pagination.per_page,
+            offset=pagination.per_page * (pagination.page - 1)
+        )
 
 
 @router.post('',
