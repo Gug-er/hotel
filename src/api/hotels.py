@@ -28,24 +28,28 @@ async def get_hotels(
 
 @router.post('',
              summary='Create hotel',
-             description='Adds hotel to hotels, title and name required, id generates')
+             description='Adds hotel to hotels, '
+                         'location and title required, '
+                         'id generates'
+)
 async def create_hotel(hotel_data: Hotel = Body()):
     async with async_session_maker() as session:
-        add_hotel_stmt = insert(HotelsOrm).values(**hotel_data.model_dump())
-        await session.execute(add_hotel_stmt)
+        hotel = await HotelsRepository(session).add(hotel_data)
         await session.commit()
-    return {'status': 'OK'}
+
+    return {'status': 'OK', 'data': hotel}
 
 
 @router.put('/{hotel_id}',
             summary='Edit hotel by id',
-            description='Gets hotel by id and updates hotel title and name',)
+            description='Gets hotel by id and updates hotel title AND name,'
+                        'both are required',)
 def edit_hotel(hotel_id: int, hotel_data: Hotel):
     global hotels
     for hotel in hotels:
         if hotel['id'] == hotel_id:
+            hotel['location'] = hotel_data.location
             hotel['title'] = hotel_data.title
-            hotel['name'] = hotel_data.name
             return {'status': 'OK'}
     return {'status': 'Hotel not found'}
 
