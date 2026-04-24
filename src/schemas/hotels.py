@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Hotel(BaseModel):
@@ -6,10 +6,10 @@ class Hotel(BaseModel):
     location: str
 
 class HotelPATCH(BaseModel):
-    title: str | None = None
-    location: str | None = None
+    title: str | None = Field(None)
+    location: str | None = Field(None)
 
 
 class HotelGET(BaseModel):
-    title: str | None = None
-    location: str | None = None
+    title: str | None = Field(None)
+    location: str | None = Field(None)
